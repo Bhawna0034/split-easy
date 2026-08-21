@@ -8,10 +8,11 @@ import { ArrowRight, Loader2, LockKeyhole, Mail, UserRound, Wallet } from 'lucid
 
 type Mode = 'login' | 'signup'
 
-export default function AuthForm({ mode }: { mode: Mode }) {
+export default function AuthForm({ mode, uiOnly = false }: { mode: Mode; uiOnly?: boolean }) {
   const router = useRouter()
   const [error, setError] = useState('')
   const [pending, setPending] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
   const isSignup = mode === 'signup'
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -24,6 +25,12 @@ export default function AuthForm({ mode }: { mode: Mode }) {
     const password = String(form.get('password') ?? '')
     if (isSignup && name.length < 2) { setError('Please enter your name.'); setPending(false); return }
     if (password.length < 8) { setError('Use at least 8 characters for your password.'); setPending(false); return }
+
+    if (uiOnly) {
+      setSubmitted(true)
+      setPending(false)
+      return
+    }
 
     if (isSignup) {
       const response = await fetch('/api/auth/signup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, email, password }) })
@@ -48,6 +55,7 @@ export default function AuthForm({ mode }: { mode: Mode }) {
           <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#aaa5a0]">{isSignup ? 'Get started' : 'Welcome back'}</p>
           <h1 className="mt-3 text-3xl font-bold tracking-[-0.05em] sm:text-4xl">{isSignup ? 'Create your account.' : 'Log in to SplitEasy.'}</h1>
           <p className="mt-3 text-sm leading-relaxed text-[#88827d]">{isSignup ? 'Start splitting expenses with your people.' : 'Pick up where you left off with your groups.'}</p>
+          {submitted && uiOnly && <p role="status" className="mt-8 rounded-xl bg-[#e4f0e8] px-3 py-2.5 text-sm text-[#356044]">This is a UI preview. Your account has not been created.</p>}
           <form onSubmit={submit} className="mt-8 flex flex-col gap-4">
             {isSignup && <label className="flex flex-col gap-2 text-sm font-semibold">Your name<div className="flex items-center gap-3 rounded-xl border border-[#ded8d2] bg-white px-3 focus-within:ring-2 focus-within:ring-[#f07d58]"><UserRound className="size-4 text-[#aaa5a0]" /><input name="name" required className="h-11 min-w-0 flex-1 bg-transparent text-sm font-normal outline-none" placeholder="Rohan Kapoor" /></div></label>}
             <label className="flex flex-col gap-2 text-sm font-semibold">Email<div className="flex items-center gap-3 rounded-xl border border-[#ded8d2] bg-white px-3 focus-within:ring-2 focus-within:ring-[#f07d58]"><Mail className="size-4 text-[#aaa5a0]" /><input name="email" type="email" required className="h-11 min-w-0 flex-1 bg-transparent text-sm font-normal outline-none" placeholder="you@example.com" /></div></label>

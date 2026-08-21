@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 }
 
 export default function SignupPage() {
-  return <AuthForm mode="signup" />
+  return <AuthForm mode="signup" uiOnly />
 }
