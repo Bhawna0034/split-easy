@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { toast } from "sonner";
+import { signIn } from "next-auth/react";
 
 
 export default function Login() {
@@ -59,18 +60,16 @@ export default function Login() {
         setLoading(true);
 
         try {
-            const response = await fetch("api/auth/login", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(formData)
+            const result = await signIn("credentials", {
+                email: formData.email,
+                password: formData.password,
+                redirect: false
             });
-            const data = await response.json();
-            if (!response.ok) {
-                toast.error(data.error || "Something went wrong")
+            if(result?.error){
+                toast.error("Invalid email or password");
                 return;
             }
+           
             toast.success("Login successfully!", {
                 style: {
                     background: "#f0fdf4",
@@ -78,6 +77,8 @@ export default function Login() {
                     border: "1px solid #bbf7d0",
                 }
             });
+            router.push("/");
+            router.refresh();
             // console.log(data);
 
         } catch (error) {
@@ -107,7 +108,7 @@ export default function Login() {
                             <FieldLabel htmlFor="email">Email</FieldLabel>
                             <div className="relative">
                                 <Mail className="pointer-events-none absolute top-1/2 left-4 w-4 h-4 -translate-y-1/2 text-[#c0bdb9]" />
-                                <Input id="name" value={formData.email} onChange={(e) => handleChange("email", e.target.value)} placeholder="you@example.com"
+                                <Input id="email" value={formData.email} onChange={(e) => handleChange("email", e.target.value)} placeholder="you@example.com"
                                     autoComplete="off" className={`border rounded-lg pl-11 py-3.5 pr-4 text-gray-600 placeholder-[#bbbbbc] outline-none transition focus:border-neutral-400 ${errors.email ? "border-red-400" : "border-[#e4dfda]"}`} />
                             </div>
                             {errors.email && (
@@ -120,7 +121,7 @@ export default function Login() {
                             <FieldLabel htmlFor="password">Password</FieldLabel>
                             <div className="relative">
                                 <LockKeyhole className="pointer-events-none absolute top-1/2 left-4 w-4 h-4 -translate-y-1/2 text-[#c0bdb9]" />
-                                <Input id="name" type={showPassword ? "text" : "password"} value={formData.password} onChange={(e) => handleChange("password", e.target.value)} placeholder="At least 8 characters"
+                                <Input id="password" type={showPassword ? "text" : "password"} value={formData.password} onChange={(e) => handleChange("password", e.target.value)} placeholder="At least 8 characters"
                                     autoComplete="new-password" className={`border border-[#e4dfda] rounded-lg px-11 py-3.5  text-gray-600 placeholder-[#bbbbbc] outline-none transition focus:border-neutral-400 ${errors.password ? "border-red-400" : "border-[#e4dfda]"}`} />
                                 <button type="button" onClick={() => setShowPassword((prev) => !prev)} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#c0bdb9] transition hover:text-[#27232a]" aria-label={showPassword ? "Hide Password" : "Show password"}>
                                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -132,7 +133,7 @@ export default function Login() {
                                 </p>
                             )}
                         </Field>
-                        <Button type="submit" className="bg-[#27232a] text-[#f5f2ee] rounded-lg w-full h-10 hover:text-white mt-4">
+                        <Button type="submit" className="bg-[#27232a] text-[#f5f2ee] rounded-lg w-full h-10 hover:text-white mt-4" disabled={loading}>
                             {loading ? "Login" : "Login"}
                             <ArrowRight className="h-4 w-4" />
                         </Button>
