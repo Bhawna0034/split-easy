@@ -7,30 +7,22 @@ export async function POST(request: Request){
     if(!session?.user?.id){
         return NextResponse.json({error: "Unauthorized"}, {status: 401})
     }
-    const {groupId, title, amount, paidById, memberIds} = await request.json();
-
-    if(!groupId || !title?.trim() || !amount || !paidById || !memberIds?.length){
-        return NextResponse.json({error: "Missing requried fields"}, {status: 400})
+   const { name, description } = await request.json();
+ 
+    if (!name?.trim()) {
+        return NextResponse.json({ error: "Group name is required" }, { status: 400 });
     }
-
-    const membership = await prisma.groupMember.findUnique({
-        where: {groupId_userId: {groupId, userId: session.user.id}}
-    })
-    if(!membership){
-        return NextResponse.json({error: "Not a member of this group"}, {status: 403})
-    }
-
-    const total = Number(amount);
-    const share = Math.round((total / memberIds.length) * 100)/100;
-
-    const expense = await prisma.expense.create({
+ 
+    const group = await prisma.group.create({
         data: {
-            title: title.trim(),
-            amount: total,
-            groupId,
-            paidById,
-            shares: {create: memberIds.map((userId: string) => ({userId, amount: share}))},
-        }
+            name: name.trim(),
+            description: description?.trim() || null,
+            createdById: session.user.id,
+            members: {
+                create: [{ userId: session.user.id }],
+            },
+        },
     });
-    return NextResponse.json({expense}, {status: 201});
+ 
+    return NextResponse.json({ group }, { status: 201 });
 }
