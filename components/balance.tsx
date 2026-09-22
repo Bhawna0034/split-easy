@@ -1,7 +1,7 @@
-import { formatINR } from "@/lib/dashboard-data";
 import { ArrowLeft } from "lucide-react";
 import BalanceLine from "./balance-line";
 import { BalanceLine as BalanceLineType, Props } from "@/types";
+import { formatINR } from "@/lib/format";
 
 export default function Balance({
   debtLines,

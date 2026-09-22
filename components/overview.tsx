@@ -7,9 +7,9 @@ import {
   Sparkles,
 } from "lucide-react";
 import BalanceCard from "./balance-card";
-import { formatINR } from "@/lib/dashboard-data";
 import GroupCard from "./group-card";
 import ExpenseRow from "./expense-row";
+import { formatINR } from "@/lib/format";
 
 export default function Overview({
   overall,
